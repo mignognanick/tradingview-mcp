@@ -1,0 +1,34 @@
+{
+  "name": "OrbFavs DispPrec weekday scan",
+  "description": "Weekdays at 8:45 AM ET: scan OrbFavs on the 15m chart for Displacement Precursor hits, compute ADR day target and 1/3 ADR take-profit, post summary to Slack.",
+  "workflow": {
+    "triggers": [
+      {
+        "cron": {
+          "cron": "45 8 * * 1-5"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "slack": {
+          "channel": "C0CGSFW8M5E"
+        }
+      }
+    ],
+    "prompts": [
+      {
+        "prompt": "You run every weekday morning for Nick's OrbFavs Displacement Precursor desk scan.\n\nPrerequisites\n- This must run on a machine that can reach TradingView Desktop with Chrome DevTools Protocol (CDP) enabled (typically localhost:9222).\n- If CDP is down, try launching TradingView with remote debugging. When launching from a Cursor/Electron shell, strip ELECTRON_RUN_AS_NODE / ELECTRON_NO_ASAR or CDP flags will fail.\n- Confirm Displacement Precursor is on the active chart (studies persist across symbols). If it is missing, say so in the run and Slack, then stop.\n- If TradingView still cannot be reached, post a short Slack failure note and stop. Do not invent prices.\n\nScan\n1. Run the project's watchlist Displacement Precursor scan on timeframe 15 (CLI: `tv scan -t 15`, or the equivalent scan_study_values tool with timeframe \"15\").\n2. Defaults: active watchlist (OrbFavs), study Displacement Precursor, include armed Status=1 hits as well as Setup watches.\n3. Do not reimplement indicator rules — only read Setup / Status / Level plots.\n\nDaily target + ADR levels (for each hit, and lead with the single best daily target)\n1. Switch that symbol to the daily chart and pull enough completed daily bars to compute ADR(14) = average(high-low) over the last 14 completed sessions.\n2. Use that session's RTH open from the current/last daily bar (or today's open from the quote if the daily session has started).\n3. Sign from Setup: bullish watch / up bias → plus; bearish watch / down bias → minus. If only armed (Setup=0), infer direction from the Displacement Precursor context (sell-side sweep expects up; buy-side sweep expects down). If direction is unclear, state that and skip signed targets.\n4. Compute:\n   - Take profit (1/3 ADR) = open ± (ADR14 / 3)\n   - Day target (1.0 ADR) = open ± ADR14\n   - Optional stretch (1.5 ADR) = open ± (1.5 * ADR14)\n5. Pick one primary daily target name (best A-setup among hits). If zero hits, say so clearly — no fabricated target.\n\nOutput\n- In the automation run: scanned count, errors, primary daily target (symbol, signal/level, ADR14, TP 1/3 ADR, day target 1.0 ADR, invalidation), then other hits briefly.\n- Post the same summary to Slack. Lead with the daily target block; keep it scannable.\n\nInvalidation note for hits: lose the key level without reclaim / no displacement follow-through within the indicator's window."
+      }
+    ],
+    "model": "",
+    "agentOptions": {
+      "skipInstall": false
+    },
+    "memoryEnabled": true,
+    "gitConfig": {
+      "repo": "mignognanick/tradingview-mcp",
+      "branch": "main"
+    }
+  }
+}
