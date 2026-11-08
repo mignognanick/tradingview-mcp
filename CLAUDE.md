@@ -1,8 +1,16 @@
 # TradingView MCP — Claude Instructions
 
-84 tools for reading and controlling a live TradingView Desktop chart via CDP (port 9222).
+85 tools for reading and controlling a live TradingView Desktop chart via CDP (port 9222).
 
 ## Decision Tree — Which Tool When
+
+### "Scan OrbFavs / watchlist for Displacement Precursor"
+1. Confirm **Displacement Precursor** is on the active chart (`chart_get_state`)
+2. `scan_study_values` (defaults: active watchlist, study = Displacement Precursor, hits only)
+   - `Setup` `1` = bullish watch, `-1` = bearish watch, `0` = none
+   - `Status` `1` = armed near level, `2` = sweep confirmed
+3. Optional: pass `timeframe` (e.g. `"15"`) and/or `symbols: [...]`
+4. CLI: `tv scan` or `tv scan -t 15` or `tv scan -s AMD,MU,TSLA`
 
 ### "What's on my chart right now?"
 1. `chart_get_state` → symbol, timeframe, chart type, list of all indicators with entity IDs

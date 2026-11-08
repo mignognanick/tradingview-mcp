@@ -228,7 +228,12 @@ async function _probeCdp(cdpPort) {
 }
 
 function _spawnDetached(spawnFn, exe, args) {
-  const child = spawnFn(exe, args, { detached: true, stdio: 'ignore' });
+  // Cursor/VS Code shells set ELECTRON_RUN_AS_NODE=1; if inherited, TradingView's
+  // Electron binary treats Chromium flags as Node options and rejects CDP.
+  const env = { ...process.env };
+  delete env.ELECTRON_RUN_AS_NODE;
+  delete env.ELECTRON_NO_ASAR;
+  const child = spawnFn(exe, args, { detached: true, stdio: 'ignore', env });
   child.unref();
   return child;
 }

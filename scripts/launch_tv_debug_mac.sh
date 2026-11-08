@@ -49,7 +49,8 @@ sleep 1
 
 echo "Found TradingView at: $APP"
 echo "Launching with --remote-debugging-port=$PORT ..."
-"$APP" --remote-debugging-port=$PORT &
+# Cursor/VS Code shells set ELECTRON_RUN_AS_NODE=1; strip it or CDP flags break.
+env -u ELECTRON_RUN_AS_NODE -u ELECTRON_NO_ASAR "$APP" --remote-debugging-port=$PORT &
 TV_PID=$!
 echo "PID: $TV_PID"
 
